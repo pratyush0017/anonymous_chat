@@ -1,22 +1,40 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const validator = require('validator');
+const Filter = require('bad-words');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const filter = new Filter();
 
+const PORT = process.env.PORT || 3000;
+
+app.use(helmet());
 app.use(express.static('client'));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+}));
 
 let talkerQueue = [];
 let listenerQueue = [];
+const messageCount = {};
+
+const crisisWords = [
+  'suicide', 'kill myself', 'end my life',
+  'want to die', 'cant go on', "can't go on"
+];
 
 io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
+  messageCount[socket.id] = 0;
 
   socket.on('join', (role) => {
-    console.log(socket.id, 'joined as', role);
-
     if (role === 'talker') {
       if (listenerQueue.length > 0) {
         const listener = listenerQueue.shift();
@@ -24,7 +42,6 @@ io.on('connection', (socket) => {
         socket.join(room);
         listener.join(room);
         io.to(room).emit('matched', room);
-        console.log('Matched:', socket.id, 'with', listener.id);
       } else {
         talkerQueue.push(socket);
         socket.emit('waiting');
@@ -38,7 +55,6 @@ io.on('connection', (socket) => {
         socket.join(room);
         talker.join(room);
         io.to(room).emit('matched', room);
-        console.log('Matched:', socket.id, 'with', talker.id);
       } else {
         listenerQueue.push(socket);
         socket.emit('waiting');
@@ -46,13 +62,33 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ✅ NEW: relay message only to the partner in the same room
   socket.on('message', ({ room, text }) => {
     if (!text || !room) return;
-    console.log('Message in room', room, ':', text);
-    socket.to(room).emit('message', text); // send to partner only, not yourself
+    if (text.length > 500) return;
+
+    messageCount[socket.id]++;
+    setTimeout(() => {
+      if (messageCount[socket.id]) messageCount[socket.id]--;
+    }, 3000);
+
+    if (messageCount[socket.id] > 5) {
+      socket.emit('error_msg', 'Sending too fast. Slow down.');
+      return;
+    }
+
+    const clean = validator.stripLow(validator.escape(text));
+
+    const isCrisis = crisisWords.some(w => clean.toLowerCase().includes(w));
+    if (isCrisis) {
+      io.to(room).emit('crisis_alert', 'iCall Helpline: 9152987821');
+    }
+
+    let safeText = clean;
+    try { safeText = filter.clean(clean); } catch(e) {}
+
+    socket.to(room).emit('message', safeText);
   });
-  // Add this after the message handler
+
   socket.on('leave', (room) => {
     socket.to(room).emit('partner_left');
     socket.leave(room);
@@ -61,11 +97,9 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     talkerQueue = talkerQueue.filter(s => s.id !== socket.id);
     listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
+    delete messageCount[socket.id];
     console.log('Disconnected:', socket.id);
   });
-
 });
 
-server.listen(3000, () => {
-  console.log('Server running at http://localhost:3000');
-});
+server.listen(PORT, () => console.log('Running on port', PORT));
