@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SafeSpace — Talk Anonymously</title>
+  <title>SafeSpace</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,87 +17,46 @@
       justify-content: center;
     }
 
-    /* ── BACKGROUND IMAGE — only on role screen ── */
     body.on-role {
       background-image: url('/bg.webp');
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
     }
 
-    /* Dark overlay so text stays readable over the image */
     body.on-role::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0,0,0,0.65);
       z-index: 0;
     }
 
-    .screen {
-      display: none;
-      width: 100%;
-      max-width: 460px;
-      padding: 0 20px;
-    }
+    .screen { display: none; width: 100%; max-width: 460px; padding: 0 20px; }
     .screen.active { display: block; }
+    #screen-role { position: relative; z-index: 1; }
 
-    /* ── ROLE SCREEN ── */
-    #screen-role {
-      position: relative;
-      z-index: 1;
-    }
-
-    .role-header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .role-header h1 {
-      font-size: 26px;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-    .role-header p {
-      font-size: 14px;
-      color: #aaa;
-      line-height: 1.6;
-    }
+    /* Role screen */
+    .role-header { text-align: center; margin-bottom: 40px; }
+    .role-header h1 { font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+    .role-header p  { font-size: 14px; color: #aaa; line-height: 1.6; }
 
     .role-cards { display: flex; flex-direction: column; gap: 14px; }
 
     .role-card {
-      background: rgba(26, 26, 26, 0.85);
+      background: rgba(26,26,26,0.85);
       border: 1px solid #2a2a2a;
       border-radius: 14px;
       padding: 24px 20px;
       cursor: pointer;
       transition: border-color .2s, background .2s;
-      text-align: left;
       backdrop-filter: blur(6px);
     }
-    .role-card:hover {
-      border-color: #555;
-      background: rgba(34, 34, 34, 0.9);
-    }
-    .role-card h2 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 6px;
-    }
-    .role-card p {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.5;
-    }
-    .role-card .icon {
-      font-size: 28px;
-      margin-bottom: 12px;
-    }
-
+    .role-card:hover { background: rgba(34,34,34,0.9); border-color: #555; }
     .talker-card:hover   { border-color: #5b8def; }
     .listener-card:hover { border-color: #5dba7a; }
+    .role-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .role-card h2 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .role-card p  { font-size: 13px; color: #888; line-height: 1.5; }
 
     .disclaimer {
       margin-top: 24px;
@@ -109,11 +68,8 @@
       padding-top: 20px;
     }
 
-    /* ── WAITING SCREEN ── */
-    .waiting-wrap {
-      text-align: center;
-      padding: 40px 0;
-    }
+    /* Waiting screen */
+    .waiting-wrap { text-align: center; padding: 40px 0; }
     .spinner {
       width: 40px; height: 40px;
       border: 3px solid #2a2a2a;
@@ -123,18 +79,11 @@
       margin: 0 auto 24px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .waiting-wrap h2 {
-      font-size: 18px;
-      font-weight: 500;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-    .waiting-wrap p {
-      font-size: 13px;
-      color: #666;
-    }
-    .cancel-btn {
-      margin-top: 32px;
+    .waiting-wrap h2 { font-size: 18px; font-weight: 500; color: #fff; margin-bottom: 8px; }
+    .waiting-wrap p  { font-size: 13px; color: #666; }
+
+    /* Shared button style */
+    .ghost-btn {
       background: none;
       border: 1px solid #2a2a2a;
       color: #666;
@@ -142,11 +91,12 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
+      margin-top: 32px;
       transition: border-color .2s, color .2s;
     }
-    .cancel-btn:hover { border-color: #555; color: #aaa; }
+    .ghost-btn:hover { border-color: #555; color: #aaa; }
 
-    /* ── CHAT SCREEN ── */
+    /* Chat screen */
     .chat-header {
       display: flex;
       align-items: center;
@@ -155,12 +105,9 @@
       border-bottom: 1px solid #1e1e1e;
     }
     .chat-header-left { display: flex; align-items: center; gap: 10px; }
-    .online-dot {
-      width: 8px; height: 8px;
-      background: #5dba7a;
-      border-radius: 50%;
-    }
+    .online-dot { width: 8px; height: 8px; background: #5dba7a; border-radius: 50%; }
     .chat-header h2 { font-size: 15px; font-weight: 500; color: #ddd; }
+
     .end-btn {
       background: none;
       border: 1px solid #2a2a2a;
@@ -183,43 +130,24 @@
       gap: 8px;
     }
     #messages::-webkit-scrollbar { width: 4px; }
-    #messages::-webkit-scrollbar-track { background: transparent; }
     #messages::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
-    .bubble {
-      max-width: 75%;
+    .bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+    .bubble-me   { background: #1e3a5f; color: #c8dcf5; align-self: flex-end;   border-bottom-right-radius: 4px; }
+    .bubble-them { background: #1e1e1e; color: #d0d0d0; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .bubble-system { font-size: 12px; color: #555; align-self: center; background: none; padding: 4px 0; }
+
+    .crisis-banner {
+      background: #2a1a1a;
+      border: 1px solid #8b3a3a;
+      color: #e08080;
       padding: 10px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-    .bubble-me {
-      background: #1e3a5f;
-      color: #c8dcf5;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .bubble-them {
-      background: #1e1e1e;
-      color: #d0d0d0;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-    .bubble-system {
-      font-size: 12px;
-      color: #555;
-      align-self: center;
-      background: none;
-      padding: 4px 0;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
     }
 
-    .chat-input-row {
-      display: flex;
-      gap: 10px;
-      padding: 14px 0 0;
-      border-top: 1px solid #1e1e1e;
-    }
+    .chat-input-row { display: flex; gap: 10px; padding: 14px 0 0; border-top: 1px solid #1e1e1e; }
     .chat-input-row input {
       flex: 1;
       background: #1a1a1a;
@@ -229,10 +157,10 @@
       border-radius: 10px;
       font-size: 14px;
       outline: none;
-      transition: border-color .2s;
       font-family: inherit;
+      transition: border-color .2s;
     }
-    .chat-input-row input:focus  { border-color: #444; }
+    .chat-input-row input:focus { border-color: #444; }
     .chat-input-row input::placeholder { color: #444; }
     .send-btn {
       background: #1e3a5f;
@@ -250,19 +178,18 @@
 </head>
 <body>
 
-  <!-- Screen 1: Role Selection -->
   <div class="screen active" id="screen-role">
     <div class="role-header">
       <h1>SafeSpace</h1>
       <p>Talk to a stranger anonymously.<br>No names. No judgment. No history.</p>
     </div>
     <div class="role-cards">
-      <div class="role-card talker-card" onclick="join('talker')">
+      <div class="role-card talker-card" id="btn-talker">
         <div class="icon">💬</div>
         <h2>I want to talk</h2>
         <p>Something is on your mind. A stranger will listen without judging you.</p>
       </div>
-      <div class="role-card listener-card" onclick="join('listener')">
+      <div class="role-card listener-card" id="btn-listener">
         <div class="icon">🎧</div>
         <h2>I want to listen</h2>
         <p>You're here to be present for someone who needs to be heard.</p>
@@ -274,114 +201,31 @@
     </div>
   </div>
 
-  <!-- Screen 2: Waiting -->
   <div class="screen" id="screen-waiting">
     <div class="waiting-wrap">
       <div class="spinner"></div>
       <h2>Finding someone for you...</h2>
       <p>This usually takes a few seconds.</p>
-      <button class="cancel-btn" onclick="cancelWait()">Cancel</button>
+      <button class="ghost-btn" id="btn-cancel">Cancel</button>
     </div>
   </div>
 
-  <!-- Screen 3: Chat -->
   <div class="screen" id="screen-chat">
     <div class="chat-header">
       <div class="chat-header-left">
         <div class="online-dot"></div>
         <h2>Anonymous stranger</h2>
       </div>
-      <button class="end-btn" onclick="endChat()">End chat</button>
+      <button class="end-btn" id="btn-end">End chat</button>
     </div>
     <div id="messages"></div>
     <div class="chat-input-row">
-      <input
-        id="msgInput"
-        type="text"
-        placeholder="Type a message..."
-        onkeydown="if(event.key==='Enter') sendMessage()"
-        maxlength="500"
-      />
-      <button class="send-btn" onclick="sendMessage()">Send</button>
+      <input id="msgInput" type="text" placeholder="Type a message..." maxlength="500"/>
+      <button class="send-btn" id="btn-send">Send</button>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    let currentRoom = null;
-
-    // Show background image on first load
-    document.body.classList.add('on-role');
-
-    function join(role) {
-      socket.emit('join', role);
-      showScreen('waiting');
-    }
-
-    function cancelWait() {
-      socket.disconnect();
-      socket.connect();
-      showScreen('role');
-    }
-
-    function endChat() {
-      socket.emit('leave', currentRoom);
-      currentRoom = null;
-      document.getElementById('messages').innerHTML = '';
-      showScreen('role');
-    }
-
-    socket.on('matched', (room) => {
-      currentRoom = room;
-      showScreen('chat');
-      addMessage('You are now connected. Say hello.', 'system');
-    });
-
-    socket.on('partner_left', () => {
-      addMessage('Your partner has disconnected.', 'system');
-      setTimeout(() => {
-        currentRoom = null;
-        document.getElementById('messages').innerHTML = '';
-        showScreen('role');
-      }, 2000);
-    });
-
-    socket.on('message', (text) => {
-      addMessage(text, 'them');
-    });
-
-    function sendMessage() {
-      const input = document.getElementById('msgInput');
-      const text = input.value.trim();
-      if (!text || !currentRoom) return;
-      socket.emit('message', { room: currentRoom, text });
-      addMessage(text, 'me');
-      input.value = '';
-    }
-
-    function addMessage(text, sender) {
-      const div = document.createElement('div');
-      div.className = 'bubble ' +
-        (sender === 'me' ? 'bubble-me' : sender === 'them' ? 'bubble-them' : 'bubble-system');
-      div.innerText = text;
-      const box = document.getElementById('messages');
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
-
-    function showScreen(name) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-' + name).classList.add('active');
-
-      // Background image only on role screen
-      if (name === 'role') {
-        document.body.classList.add('on-role');
-      } else {
-        document.body.classList.remove('on-role');
-      }
-    }
-  </script>
-
+  <script src="/app.js"></script>
 </body>
 </html>
