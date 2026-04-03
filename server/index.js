@@ -5,16 +5,24 @@ const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const validator = require('validator');
-const Filter = require('bad-words');
-
+const leoProfanity = require('leo-profanity');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const filter = new Filter();
-
+leoProfanity.loadDictionary(); 
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'", "ws:", "wss:"]
+    }
+  }
+}));
 app.use(express.static('client'));
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -84,7 +92,7 @@ io.on('connection', (socket) => {
     }
 
     let safeText = clean;
-    try { safeText = filter.clean(clean); } catch(e) {}
+    try { safeText = leoProfanity.clean(clean); } catch(e) {}
 
     socket.to(room).emit('message', safeText);
   });
