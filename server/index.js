@@ -87,6 +87,13 @@ io.on('connection', (socket) => {
     listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
     console.log(socket.id, 'cancelled — removed from queue');
   });
+  socket.on('typing', (room) => {
+    socket.to(room).emit('typing');
+  });
+
+  socket.on('stop_typing', (room) => {
+    socket.to(room).emit('stop_typing');
+  });
 
   socket.on('message', ({ room, text }) => {
     if (!text || !room) return;
