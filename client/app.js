@@ -1,14 +1,16 @@
 const socket = io();
 let currentRoom = null;
+let cooldown = false; // prevents instant rematch spam
 
 document.body.classList.add('on-role');
 
 // Role screen buttons
 document.getElementById('btn-talker').addEventListener('click', function() {
-  showScreen('topic'); // talker goes to topic selection first
+  showScreen('topic');
 });
 
 document.getElementById('btn-listener').addEventListener('click', function() {
+  if (cooldown) return;
   socket.emit('join', { role: 'listener', topic: null });
   showScreen('waiting');
 });
@@ -27,13 +29,17 @@ document.getElementById('topic-vent').addEventListener('click', function() {
   joinAsTalker('Just venting');
 });
 
-// Cancel and end buttons
+// Cancel — sends user back from waiting screen to role screen
 document.getElementById('btn-cancel').addEventListener('click', function() {
   cancelWait();
 });
+
+// End chat button
 document.getElementById('btn-end').addEventListener('click', function() {
   endChat();
 });
+
+// Send message
 document.getElementById('btn-send').addEventListener('click', function() {
   sendMessage();
 });
@@ -41,23 +47,60 @@ document.getElementById('msgInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') sendMessage();
 });
 
-// Functions
+// ── Functions ──
+
 function joinAsTalker(topic) {
+  if (cooldown) return;
   socket.emit('join', { role: 'talker', topic: topic });
   showScreen('waiting');
 }
 
 function cancelWait() {
-  socket.disconnect();
-  socket.connect();
+  // Tell server to remove from queue
+  socket.emit('cancel');
   showScreen('role');
 }
 
 function endChat() {
+  if (!currentRoom) return;
   socket.emit('leave', currentRoom);
   currentRoom = null;
-  document.getElementById('messages').innerHTML = '';
+  clearChat();
+  startCooldown(); // 3 second cooldown before they can rejoin
   showScreen('role');
+  showCooldownMessage();
+}
+
+function clearChat() {
+  document.getElementById('messages').innerHTML = '';
+}
+
+function startCooldown() {
+  cooldown = true;
+  setTimeout(function() {
+    cooldown = false;
+  }, 3000); // 3 seconds
+}
+
+function showCooldownMessage() {
+  // Show a small message on role screen that fades away
+  const existing = document.getElementById('cooldown-msg');
+  if (existing) existing.remove();
+
+  const msg = document.createElement('p');
+  msg.id = 'cooldown-msg';
+  msg.innerText = 'You can start a new conversation in 3 seconds...';
+  msg.style.cssText = 'text-align:center; font-size:12px; color:#666; margin-top:16px;';
+  document.getElementById('screen-role').appendChild(msg);
+
+  setTimeout(function() {
+    msg.innerText = 'Ready. Pick a role above to start again.';
+    msg.style.color = '#5dba7a';
+  }, 3000);
+
+  setTimeout(function() {
+    if (msg.parentNode) msg.remove();
+  }, 6000);
 }
 
 function sendMessage() {
@@ -91,12 +134,12 @@ function showScreen(name) {
   }
 }
 
-// Socket events
+// ── Socket events ──
+
 socket.on('matched', function({ room, topic }) {
   currentRoom = room;
   showScreen('chat');
 
-  // If listener, show what the talker wants to talk about
   if (topic) {
     const banner = document.createElement('div');
     banner.className = 'topic-banner';
@@ -109,11 +152,28 @@ socket.on('matched', function({ room, topic }) {
 
 socket.on('partner_left', function() {
   addMessage('Your partner has disconnected.', 'system');
-  setTimeout(function() {
+
+  // Show a rejoin button instead of auto-redirecting
+  const btn = document.createElement('button');
+  btn.innerText = 'Find a new match';
+  btn.style.cssText = `
+    display: block;
+    margin: 12px auto;
+    background: #1e3a5f;
+    color: #7aaee8;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+  `;
+  btn.addEventListener('click', function() {
     currentRoom = null;
-    document.getElementById('messages').innerHTML = '';
+    clearChat();
+    btn.remove();
     showScreen('role');
-  }, 2000);
+  });
+  document.getElementById('messages').appendChild(btn);
 });
 
 socket.on('message', function(text) {
