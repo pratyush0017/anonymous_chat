@@ -105,8 +105,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('leave', (room) => {
+    if (!room) return;
     socket.to(room).emit('partner_left');
     socket.leave(room);
+    console.log(socket.id, 'left room:', room);
   });
 
   socket.on('disconnect', () => {
