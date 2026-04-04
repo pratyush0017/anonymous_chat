@@ -112,11 +112,16 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    // If they were in a room, notify partner
+    const rooms = Array.from(socket.rooms).filter(r => r !== socket.id);
+    rooms.forEach(room => {
+      socket.to(room).emit('partner_left');
+    });
+    // Clean up queues
     talkerQueue = talkerQueue.filter(s => s.id !== socket.id);
     listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
     delete messageCount[socket.id];
     console.log('Disconnected:', socket.id);
   });
-});
 
 server.listen(PORT, () => console.log('Running on port', PORT));
