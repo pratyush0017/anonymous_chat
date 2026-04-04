@@ -126,9 +126,12 @@ function sendMessage() {
   const text = input.value.trim();
   if (!text || !currentRoom) return;
   socket.emit('message', { room: currentRoom, text });
+  socket.emit('stop_typing', currentRoom);
+  clearTimeout(typingTimer);
   addMessage(text, 'me');
   input.value = '';
 }
+
 
 function addMessage(text, sender) {
   const div = document.createElement('div');
@@ -221,4 +224,11 @@ socket.on('crisis_alert', function(helpline) {
 
 socket.on('error_msg', function(msg) {
   addMessage(msg, 'system');
+  socket.on('typing', function() {
+  document.getElementById('typing-indicator').style.display = 'block';
+});
+
+socket.on('stop_typing', function() {
+  document.getElementById('typing-indicator').style.display = 'none';
+});
 });
