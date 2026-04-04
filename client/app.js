@@ -151,23 +151,43 @@ socket.on('matched', function({ room, topic }) {
 });
 
 socket.on('partner_left', function() {
-  currentRoom = null;
-  clearChat();
+  addMessage('Your partner has disconnected.', 'system');
 
-  // Show reconnecting screen
-  showScreen('waiting');
+  const btn = document.createElement('button');
+  btn.innerText = 'Find a new match';
+  btn.style.cssText = `
+    display: block;
+    margin: 12px auto;
+    background: #1e3a5f;
+    color: #7aaee8;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+  `;
 
-  const waitingTitle = document.querySelector('#screen-waiting h2');
-  const waitingSubtitle = document.querySelector('#screen-waiting p');
+  btn.addEventListener('click', function() {
+    currentRoom = null;
+    clearChat();
 
-  waitingTitle.style.fontWeight = 'bold';
-  waitingTitle.innerText = 'Connecting...';
-  waitingSubtitle.innerText = 'Please wait while we find someone new for you.';
+    // Switch to waiting screen with connecting message
+    const waitingTitle = document.querySelector('#screen-waiting h2');
+    const waitingSubtitle = document.querySelector('#screen-waiting p');
+    waitingTitle.innerText = 'Connecting...';
+    waitingTitle.style.fontWeight = 'bold';
+    waitingSubtitle.innerText = 'Please wait while we find someone new for you.';
+    waitingSubtitle.style.color = '#888';
 
-  // Auto rejoin as listener after 1 second
-  setTimeout(function() {
-    socket.emit('join', { role: 'listener', topic: null });
-  }, 1000);
+    showScreen('waiting');
+
+    // Auto rejoin as listener
+    setTimeout(function() {
+      socket.emit('join', { role: 'listener', topic: null });
+    }, 1000);
+  });
+
+  document.getElementById('messages').appendChild(btn);
 });
 
 socket.on('message', function(text) {
