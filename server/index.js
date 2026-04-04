@@ -42,15 +42,19 @@ io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
   messageCount[socket.id] = 0;
 
-  socket.on('join', (role) => {
+  socket.on('join', ({ role, topic }) => {
     if (role === 'talker') {
       if (listenerQueue.length > 0) {
         const listener = listenerQueue.shift();
         const room = socket.id + '#' + listener.id;
         socket.join(room);
         listener.join(room);
-        io.to(room).emit('matched', room);
+        // Send topic to listener, send room to talker
+        listener.emit('matched', { room, topic });
+        socket.emit('matched', { room, topic: null });
+        console.log('Matched:', socket.id, 'with', listener.id, '| Topic:', topic);
       } else {
+        socket.topic = topic; // store topic on socket for later
         talkerQueue.push(socket);
         socket.emit('waiting');
       }
@@ -62,7 +66,10 @@ io.on('connection', (socket) => {
         const room = socket.id + '#' + talker.id;
         socket.join(room);
         talker.join(room);
-        io.to(room).emit('matched', room);
+        // Send talker's stored topic to listener
+        socket.emit('matched', { room, topic: talker.topic });
+        talker.emit('matched', { room, topic: null });
+        console.log('Matched:', socket.id, 'with', talker.id, '| Topic:', talker.topic);
       } else {
         listenerQueue.push(socket);
         socket.emit('waiting');
