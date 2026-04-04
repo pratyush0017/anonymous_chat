@@ -45,8 +45,25 @@ document.getElementById('btn-send').addEventListener('click', function() {
   sendMessage();
 });
 document.getElementById('msgInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') sendMessage();
+  if (e.key === 'Enter') {
+    sendMessage();
+    return;
+  }
+
+  // Tell partner you are typing
+  if (currentRoom) {
+    socket.emit('typing', currentRoom);
+  }
+
+  // Stop typing after 1.5 seconds of no keypress
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(function() {
+    if (currentRoom) {
+      socket.emit('stop_typing', currentRoom);
+    }
+  }, 1500);
 });
+
 
 // ── Functions ──
 
