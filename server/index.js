@@ -6,11 +6,14 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const validator = require('validator');
 const leoProfanity = require('leo-profanity');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-leoProfanity.loadDictionary(); 
+
 const PORT = process.env.PORT || 3000;
+
+leoProfanity.loadDictionary();
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -23,7 +26,9 @@ app.use(helmet({
     }
   }
 }));
+
 app.use(express.static('client'));
+
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
@@ -43,27 +48,23 @@ io.on('connection', (socket) => {
   messageCount[socket.id] = 0;
 
   socket.on('join', ({ role, topic }) => {
+    console.log(socket.id, 'joined as', role, '| topic:', topic);
+
     if (role === 'talker') {
       if (listenerQueue.length > 0) {
         const listener = listenerQueue.shift();
         const room = socket.id + '#' + listener.id;
         socket.join(room);
         listener.join(room);
-        // Send topic to listener, send room to talker
         listener.emit('matched', { room, topic });
         socket.emit('matched', { room, topic: null });
-        console.log('Matched:', socket.id, 'with', listener.id, '| Topic:', topic);
+        console.log('Matched:', socket.id, 'with', listener.id);
       } else {
-        socket.topic = topic; // store topic on socket for later
+        socket.topic = topic;
         talkerQueue.push(socket);
         socket.emit('waiting');
       }
     }
-    socket.on('cancel', () => {
-    talkerQueue = talkerQueue.filter(s => s.id !== socket.id);
-    listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
-    console.log(socket.id, 'cancelled — removed from queue');
-  });
 
     if (role === 'listener') {
       if (talkerQueue.length > 0) {
@@ -71,15 +72,20 @@ io.on('connection', (socket) => {
         const room = socket.id + '#' + talker.id;
         socket.join(room);
         talker.join(room);
-        // Send talker's stored topic to listener
         socket.emit('matched', { room, topic: talker.topic });
         talker.emit('matched', { room, topic: null });
-        console.log('Matched:', socket.id, 'with', talker.id, '| Topic:', talker.topic);
+        console.log('Matched:', socket.id, 'with', talker.id);
       } else {
         listenerQueue.push(socket);
         socket.emit('waiting');
       }
     }
+  });
+
+  socket.on('cancel', () => {
+    talkerQueue = talkerQueue.filter(s => s.id !== socket.id);
+    listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
+    console.log(socket.id, 'cancelled — removed from queue');
   });
 
   socket.on('message', ({ room, text }) => {
@@ -88,7 +94,7 @@ io.on('connection', (socket) => {
 
     messageCount[socket.id]++;
     setTimeout(() => {
-      if (messageCount[socket.id]) messageCount[socket.id]--;
+      if (messageCount[socket.id] > 0) messageCount[socket.id]--;
     }, 3000);
 
     if (messageCount[socket.id] > 5) {
@@ -117,17 +123,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    // If they were in a room, notify partner
     const rooms = Array.from(socket.rooms).filter(r => r !== socket.id);
     rooms.forEach(room => {
       socket.to(room).emit('partner_left');
     });
-    // Clean up queues
     talkerQueue = talkerQueue.filter(s => s.id !== socket.id);
     listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
     delete messageCount[socket.id];
     console.log('Disconnected:', socket.id);
   });
 
-server.listen(PORT, () => console.log('Running on port', PORT));
+});
+
+server.listen(PORT, () => {
+  console.log('Running on port', PORT);
 });
