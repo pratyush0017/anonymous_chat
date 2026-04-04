@@ -151,29 +151,23 @@ socket.on('matched', function({ room, topic }) {
 });
 
 socket.on('partner_left', function() {
-  addMessage('Your partner has disconnected.', 'system');
+  currentRoom = null;
+  clearChat();
 
-  // Show a rejoin button instead of auto-redirecting
-  const btn = document.createElement('button');
-  btn.innerText = 'Find a new match';
-  btn.style.cssText = `
-    display: block;
-    margin: 12px auto;
-    background: #1e3a5f;
-    color: #7aaee8;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13px;
-  `;
-  btn.addEventListener('click', function() {
-    currentRoom = null;
-    clearChat();
-    btn.remove();
-    showScreen('role');
-  });
-  document.getElementById('messages').appendChild(btn);
+  // Show reconnecting screen
+  showScreen('waiting');
+
+  const waitingTitle = document.querySelector('#screen-waiting h2');
+  const waitingSubtitle = document.querySelector('#screen-waiting p');
+
+  waitingTitle.style.fontWeight = 'bold';
+  waitingTitle.innerText = 'Connecting...';
+  waitingSubtitle.innerText = 'Please wait while we find someone new for you.';
+
+  // Auto rejoin as listener after 1 second
+  setTimeout(function() {
+    socket.emit('join', { role: 'listener', topic: null });
+  }, 1000);
 });
 
 socket.on('message', function(text) {
