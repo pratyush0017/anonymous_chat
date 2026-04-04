@@ -59,6 +59,11 @@ io.on('connection', (socket) => {
         socket.emit('waiting');
       }
     }
+    socket.on('cancel', () => {
+    talkerQueue = talkerQueue.filter(s => s.id !== socket.id);
+    listenerQueue = listenerQueue.filter(s => s.id !== socket.id);
+    console.log(socket.id, 'cancelled — removed from queue');
+  });
 
     if (role === 'listener') {
       if (talkerQueue.length > 0) {
@@ -125,3 +130,4 @@ io.on('connection', (socket) => {
   });
 
 server.listen(PORT, () => console.log('Running on port', PORT));
+});
