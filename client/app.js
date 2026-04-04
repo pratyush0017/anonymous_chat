@@ -1,6 +1,7 @@
 const socket = io();
 let currentRoom = null;
-let cooldown = false; // prevents instant rematch spam
+let cooldown = false;
+let typingTimer = null; // prevents instant rematch spam
 
 document.body.classList.add('on-role');
 
