@@ -174,6 +174,16 @@
       transition: background .2s;
     }
     .send-btn:hover { background: #264d7a; }
+    .topic-banner {
+      background: rgba(91, 141, 239, 0.1);
+      border: 1px solid rgba(91, 141, 239, 0.3);
+      color: #7aaee8;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -200,7 +210,34 @@
       call iCall: <strong>9152987821</strong>
     </div>
   </div>
-
+<div class="screen" id="screen-topic">
+    <div class="role-header">
+      <h1>What's on your mind?</h1>
+      <p>Pick a topic so your listener knows what to expect.</p>
+    </div>
+    <div class="role-cards" id="topic-cards">
+      <div class="role-card topic-card" id="topic-stress">
+        <div class="icon">📚</div>
+        <h2>Stress / Academics</h2>
+        <p>Pressure, exams, deadlines, or feeling overwhelmed.</p>
+      </div>
+      <div class="role-card topic-card" id="topic-relations">
+        <div class="icon">💔</div>
+        <h2>Family & Relationships</h2>
+        <p>Conflicts, loneliness in relationships, or family tension.</p>
+      </div>
+      <div class="role-card topic-card" id="topic-lonely">
+        <div class="icon">🌙</div>
+        <h2>Loneliness</h2>
+        <p>Feeling alone, disconnected, or like no one understands.</p>
+      </div>
+      <div class="role-card topic-card" id="topic-vent">
+        <div class="icon">💭</div>
+        <h2>Just venting</h2>
+        <p>No specific topic — you just need to let it out.</p>
+      </div>
+    </div>
+  </div>
   <div class="screen" id="screen-waiting">
     <div class="waiting-wrap">
       <div class="spinner"></div>

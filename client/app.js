@@ -1,37 +1,49 @@
 const socket = io();
 let currentRoom = null;
 
-// Show background on load
 document.body.classList.add('on-role');
 
-// Button listeners — no onclick in HTML
+// Role screen buttons
 document.getElementById('btn-talker').addEventListener('click', function() {
-  join('talker');
+  showScreen('topic'); // talker goes to topic selection first
 });
 
 document.getElementById('btn-listener').addEventListener('click', function() {
-  join('listener');
+  socket.emit('join', { role: 'listener', topic: null });
+  showScreen('waiting');
 });
 
+// Topic cards
+document.getElementById('topic-stress').addEventListener('click', function() {
+  joinAsTalker('Stress / Academics');
+});
+document.getElementById('topic-relations').addEventListener('click', function() {
+  joinAsTalker('Family & Relationships');
+});
+document.getElementById('topic-lonely').addEventListener('click', function() {
+  joinAsTalker('Loneliness');
+});
+document.getElementById('topic-vent').addEventListener('click', function() {
+  joinAsTalker('Just venting');
+});
+
+// Cancel and end buttons
 document.getElementById('btn-cancel').addEventListener('click', function() {
   cancelWait();
 });
-
 document.getElementById('btn-end').addEventListener('click', function() {
   endChat();
 });
-
 document.getElementById('btn-send').addEventListener('click', function() {
   sendMessage();
 });
-
 document.getElementById('msgInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') sendMessage();
 });
 
 // Functions
-function join(role) {
-  socket.emit('join', role);
+function joinAsTalker(topic) {
+  socket.emit('join', { role: 'talker', topic: topic });
   showScreen('waiting');
 }
 
@@ -72,7 +84,7 @@ function showScreen(name) {
     s.classList.remove('active');
   });
   document.getElementById('screen-' + name).classList.add('active');
-  if (name === 'role') {
+  if (name === 'role' || name === 'topic') {
     document.body.classList.add('on-role');
   } else {
     document.body.classList.remove('on-role');
@@ -80,9 +92,18 @@ function showScreen(name) {
 }
 
 // Socket events
-socket.on('matched', function(room) {
+socket.on('matched', function({ room, topic }) {
   currentRoom = room;
   showScreen('chat');
+
+  // If listener, show what the talker wants to talk about
+  if (topic) {
+    const banner = document.createElement('div');
+    banner.className = 'topic-banner';
+    banner.innerText = 'This person wants to talk about: ' + topic;
+    document.getElementById('messages').appendChild(banner);
+  }
+
   addMessage('You are now connected. Say hello.', 'system');
 });
 
