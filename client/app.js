@@ -249,4 +249,3 @@ socket.on('error_msg', function(msg) {
 socket.on('stop_typing', function() {
   document.getElementById('typing-indicator').style.display = 'none';
 });
-});
