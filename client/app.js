@@ -50,6 +50,9 @@ document.getElementById('msgInput').addEventListener('keydown', function(e) {
     return;
   }
 
+  // Show on your own screen too
+  document.getElementById('typing-indicator').style.display = 'block';
+
   // Tell partner you are typing
   if (currentRoom) {
     socket.emit('typing', currentRoom);
@@ -58,6 +61,7 @@ document.getElementById('msgInput').addEventListener('keydown', function(e) {
   // Stop typing after 1.5 seconds of no keypress
   clearTimeout(typingTimer);
   typingTimer = setTimeout(function() {
+    document.getElementById('typing-indicator').style.display = 'none';
     if (currentRoom) {
       socket.emit('stop_typing', currentRoom);
     }
@@ -128,6 +132,7 @@ function sendMessage() {
   socket.emit('message', { room: currentRoom, text });
   socket.emit('stop_typing', currentRoom);
   clearTimeout(typingTimer);
+  document.getElementById('typing-indicator').style.display = 'none';
   addMessage(text, 'me');
   input.value = '';
 }
@@ -223,7 +228,20 @@ socket.on('crisis_alert', function(helpline) {
 });
 
 socket.on('error_msg', function(msg) {
-  addMessage(msg, 'system');
+  // Mark the last sent bubble as failed
+  const messages = document.getElementById('messages');
+  const bubbles = messages.querySelectorAll('.bubble-me');
+  if (bubbles.length > 0) {
+    const last = bubbles[bubbles.length - 1];
+    last.style.opacity = '0.4';
+    last.style.borderLeft = '3px solid #e05555';
+
+    const fail = document.createElement('span');
+    fail.innerText = ' ✕ not sent';
+    fail.style.cssText = 'font-size:11px; color:#e05555; margin-left:6px;';
+    last.appendChild(fail);
+  }
+});
   socket.on('typing', function() {
   document.getElementById('typing-indicator').style.display = 'block';
 });
