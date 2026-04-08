@@ -12,31 +12,48 @@
       background: #0f0f0f;
       color: #e0e0e0;
       min-height: 100vh;
-      min-height: 100dvh; /* handles mobile browser chrome */
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow-x: hidden;
     }
 
-    body.on-role {
-      background-image: url('/bg.webp');
+    /* Background image layer — sits behind everything */
+    #bg-image {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-image: url('/bg.jpg');
       background-size: cover;
       background-position: center;
+      z-index: 0;
     }
+    #bg-image.active { display: block; }
 
-   body.on-role::before {
-      content: '';
+    /* Dark overlay layer — sits on top of image, below content */
+    #bg-overlay {
+      display: none;
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.65);
-      z-index: -1;
+      z-index: 1;
       pointer-events: none;
     }
+    #bg-overlay.active { display: block; }
 
-    .screen { display: none; width: 100%; max-width: 460px; padding: 0 20px; }
+    /* All screens sit above overlay */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 460px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 2;
+    }
     .screen.active { display: block; }
-    #screen-role { position: relative; z-index: 1; pointer-events: all; }
-    /* ── Role screen ── */
+
+    /* Role screen */
     .role-header { text-align: center; margin-bottom: 40px; }
     .role-header h1 { font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 8px; }
     .role-header p  { font-size: 14px; color: #aaa; line-height: 1.6; }
@@ -44,17 +61,17 @@
     .role-cards { display: flex; flex-direction: column; gap: 14px; }
 
     .role-card {
-      background: rgba(26,26,26,0.85);
+      background: rgba(26,26,26,0.88);
       border: 1px solid #2a2a2a;
       border-radius: 14px;
       padding: 24px 20px;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
       transition: border-color .2s, background .2s;
-      backdrop-filter: blur(6px);
     }
-    .role-card:hover  { background: rgba(34,34,34,0.9); border-color: #555; }
-    .talker-card:hover   { border-color: #5b8def; }
-    .listener-card:hover { border-color: #5dba7a; }
+    .role-card:active { background: rgba(40,40,40,0.95); }
+    .talker-card:hover,   .talker-card:active   { border-color: #5b8def; }
+    .listener-card:hover, .listener-card:active { border-color: #5dba7a; }
     .role-card .icon { font-size: 28px; margin-bottom: 12px; }
     .role-card h2 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
     .role-card p  { font-size: 13px; color: #888; line-height: 1.5; }
@@ -69,7 +86,11 @@
       padding-top: 20px;
     }
 
-    /* ── Waiting screen ── */
+    /* Topic screen */
+    .role-cards .topic-card:hover,
+    .role-cards .topic-card:active { border-color: #5b8def; }
+
+    /* Waiting screen */
     .waiting-wrap { text-align: center; padding: 40px 0; }
     .spinner {
       width: 40px; height: 40px;
@@ -87,17 +108,17 @@
       background: none;
       border: 1px solid #2a2a2a;
       color: #666;
-      padding: 12px 24px; /* bigger tap target */
+      padding: 12px 24px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
       margin-top: 32px;
-      min-height: 44px;   /* minimum tap target */
+      min-height: 44px;
       transition: border-color .2s, color .2s;
     }
     .ghost-btn:hover { border-color: #555; color: #aaa; }
 
-    /* ── Chat screen — full height on mobile ── */
+    /* Chat screen — full height flex column */
     #screen-chat {
       display: none;
       flex-direction: column;
@@ -106,10 +127,12 @@
       max-width: 460px;
       width: 100%;
       padding: 0;
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      background: #0f0f0f;
     }
-    #screen-chat.active {
-      display: flex;
-    }
+    #screen-chat.active { display: flex; }
 
     .chat-header {
       display: flex;
@@ -117,7 +140,7 @@
       justify-content: space-between;
       padding: 14px 20px;
       border-bottom: 1px solid #1e1e1e;
-      flex-shrink: 0; /* never compress the header */
+      flex-shrink: 0;
     }
     .chat-header-left { display: flex; align-items: center; gap: 10px; }
     .online-dot { width: 8px; height: 8px; background: #5dba7a; border-radius: 50%; }
@@ -131,12 +154,11 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 12px;
-      min-height: 44px; /* minimum tap target */
+      min-height: 44px;
       transition: border-color .2s, color .2s;
     }
     .end-btn:hover { border-color: #e05555; color: #e05555; }
 
-    /* Messages fill all remaining space and scroll */
     #messages {
       flex: 1;
       overflow-y: auto;
@@ -144,7 +166,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+      -webkit-overflow-scrolling: touch;
     }
     #messages::-webkit-scrollbar { width: 4px; }
     #messages::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
@@ -157,9 +179,16 @@
       flex-shrink: 0;
     }
 
-    .bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
-    .bubble-me   { background: #1e3a5f; color: #c8dcf5; align-self: flex-end;   border-bottom-right-radius: 4px; }
-    .bubble-them { background: #1e1e1e; color: #d0d0d0; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .bubble-me     { background: #1e3a5f; color: #c8dcf5; align-self: flex-end;   border-bottom-right-radius: 4px; }
+    .bubble-them   { background: #1e1e1e; color: #d0d0d0; align-self: flex-start; border-bottom-left-radius: 4px; }
     .bubble-system { font-size: 12px; color: #555; align-self: center; background: none; padding: 4px 0; }
 
     .crisis-banner {
@@ -183,15 +212,13 @@
       margin-bottom: 8px;
     }
 
-    /* Input row pinned to bottom */
     .chat-input-row {
       display: flex;
       gap: 10px;
       padding: 12px 20px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
       border-top: 1px solid #1e1e1e;
       flex-shrink: 0;
-      /* Handles iPhone home bar */
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
     .chat-input-row input {
       flex: 1;
@@ -200,7 +227,7 @@
       color: #e0e0e0;
       padding: 12px 14px;
       border-radius: 10px;
-      font-size: 16px; /* prevents iOS zoom on focus */
+      font-size: 16px;
       outline: none;
       font-family: inherit;
       min-height: 44px;
@@ -224,7 +251,6 @@
     }
     .send-btn:hover { background: #264d7a; }
 
-    /* ── Small phones (under 380px) ── */
     @media (max-width: 380px) {
       .role-header h1 { font-size: 22px; }
       .role-card { padding: 18px 16px; }
@@ -234,6 +260,11 @@
 </head>
 <body>
 
+  <!-- Background layers — controlled by JS -->
+  <div id="bg-image"></div>
+  <div id="bg-overlay"></div>
+
+  <!-- Screen 1: Role Selection -->
   <div class="screen active" id="screen-role">
     <div class="role-header">
       <h1>SafeSpace</h1>
@@ -256,12 +287,14 @@
       call iCall: <strong>9152987821</strong>
     </div>
   </div>
-<div class="screen" id="screen-topic">
+
+  <!-- Screen 2: Topic Selection -->
+  <div class="screen" id="screen-topic">
     <div class="role-header">
       <h1>What's on your mind?</h1>
       <p>Pick a topic so your listener knows what to expect.</p>
     </div>
-    <div class="role-cards" id="topic-cards">
+    <div class="role-cards">
       <div class="role-card topic-card" id="topic-stress">
         <div class="icon">📚</div>
         <h2>Stress / Academics</h2>
@@ -284,6 +317,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Screen 3: Waiting -->
   <div class="screen" id="screen-waiting">
     <div class="waiting-wrap">
       <div class="spinner"></div>
@@ -293,6 +328,7 @@
     </div>
   </div>
 
+  <!-- Screen 4: Chat -->
   <div class="screen" id="screen-chat">
     <div class="chat-header">
       <div class="chat-header-left">
@@ -302,7 +338,7 @@
       <button class="end-btn" id="btn-end">End chat</button>
     </div>
     <div id="messages"></div>
-    <div id="typing-indicator">Someone is typing...</div>     
+    <div id="typing-indicator">Someone is typing...</div>
     <div class="chat-input-row">
       <input id="msgInput" type="text" placeholder="Type a message..." maxlength="500"/>
       <button class="send-btn" id="btn-send">Send</button>
