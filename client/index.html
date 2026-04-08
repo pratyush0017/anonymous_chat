@@ -19,19 +19,17 @@
       overflow-x: hidden;
     }
 
-    /* Background image layer — sits behind everything */
     #bg-image {
       display: none;
       position: fixed;
       inset: 0;
-      background-image: url('/bg.jpg');
+      background-image: url('/bg.webp');
       background-size: cover;
       background-position: center;
       z-index: 0;
     }
     #bg-image.active { display: block; }
 
-    /* Dark overlay layer — sits on top of image, below content */
     #bg-overlay {
       display: none;
       position: fixed;
@@ -42,7 +40,6 @@
     }
     #bg-overlay.active { display: block; }
 
-    /* All screens sit above overlay */
     .screen {
       display: none;
       width: 100%;
@@ -53,7 +50,6 @@
     }
     .screen.active { display: block; }
 
-    /* Role screen */
     .role-header { text-align: center; margin-bottom: 40px; }
     .role-header h1 { font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 8px; }
     .role-header p  { font-size: 14px; color: #aaa; line-height: 1.6; }
@@ -69,9 +65,10 @@
       -webkit-tap-highlight-color: transparent;
       transition: border-color .2s, background .2s;
     }
-    .role-card:active { background: rgba(40,40,40,0.95); }
-    .talker-card:hover,   .talker-card:active   { border-color: #5b8def; }
-    .listener-card:hover, .listener-card:active { border-color: #5dba7a; }
+    .role-card:active { background: rgba(50,50,50,0.95); }
+    .talker-card:active   { border-color: #5b8def; }
+    .listener-card:active { border-color: #5dba7a; }
+    .topic-card:active    { border-color: #5b8def; }
     .role-card .icon { font-size: 28px; margin-bottom: 12px; }
     .role-card h2 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
     .role-card p  { font-size: 13px; color: #888; line-height: 1.5; }
@@ -86,11 +83,6 @@
       padding-top: 20px;
     }
 
-    /* Topic screen */
-    .role-cards .topic-card:hover,
-    .role-cards .topic-card:active { border-color: #5b8def; }
-
-    /* Waiting screen */
     .waiting-wrap { text-align: center; padding: 40px 0; }
     .spinner {
       width: 40px; height: 40px;
@@ -114,11 +106,10 @@
       font-size: 13px;
       margin-top: 32px;
       min-height: 44px;
+      display: inline-block;
       transition: border-color .2s, color .2s;
     }
-    .ghost-btn:hover { border-color: #555; color: #aaa; }
 
-    /* Chat screen — full height flex column */
     #screen-chat {
       display: none;
       flex-direction: column;
@@ -129,7 +120,7 @@
       padding: 0;
       position: fixed;
       inset: 0;
-      z-index: 2;
+      z-index: 10;
       background: #0f0f0f;
     }
     #screen-chat.active { display: flex; }
@@ -157,7 +148,6 @@
       min-height: 44px;
       transition: border-color .2s, color .2s;
     }
-    .end-btn:hover { border-color: #e05555; color: #e05555; }
 
     #messages {
       flex: 1;
@@ -168,8 +158,6 @@
       gap: 8px;
       -webkit-overflow-scrolling: touch;
     }
-    #messages::-webkit-scrollbar { width: 4px; }
-    #messages::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
     #typing-indicator {
       display: none;
@@ -179,92 +167,54 @@
       flex-shrink: 0;
     }
 
-    .bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      line-height: 1.5;
-      word-break: break-word;
-    }
+    .bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
     .bubble-me     { background: #1e3a5f; color: #c8dcf5; align-self: flex-end;   border-bottom-right-radius: 4px; }
     .bubble-them   { background: #1e1e1e; color: #d0d0d0; align-self: flex-start; border-bottom-left-radius: 4px; }
     .bubble-system { font-size: 12px; color: #555; align-self: center; background: none; padding: 4px 0; }
 
     .crisis-banner {
-      background: #2a1a1a;
-      border: 1px solid #8b3a3a;
-      color: #e08080;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      text-align: center;
+      background: #2a1a1a; border: 1px solid #8b3a3a;
+      color: #e08080; padding: 10px 14px;
+      border-radius: 8px; font-size: 13px; text-align: center;
     }
 
     .topic-banner {
       background: rgba(91,141,239,0.1);
       border: 1px solid rgba(91,141,239,0.3);
-      color: #7aaee8;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      text-align: center;
-      margin-bottom: 8px;
+      color: #7aaee8; padding: 10px 14px;
+      border-radius: 8px; font-size: 13px; text-align: center; margin-bottom: 8px;
     }
 
     .chat-input-row {
-      display: flex;
-      gap: 10px;
+      display: flex; gap: 10px;
       padding: 12px 20px;
       padding-bottom: max(12px, env(safe-area-inset-bottom));
       border-top: 1px solid #1e1e1e;
       flex-shrink: 0;
     }
     .chat-input-row input {
-      flex: 1;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      color: #e0e0e0;
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 16px;
-      outline: none;
-      font-family: inherit;
-      min-height: 44px;
-      transition: border-color .2s;
+      flex: 1; background: #1a1a1a;
+      border: 1px solid #2a2a2a; color: #e0e0e0;
+      padding: 12px 14px; border-radius: 10px;
+      font-size: 16px; outline: none;
+      font-family: inherit; min-height: 44px;
     }
-    .chat-input-row input:focus { border-color: #444; }
     .chat-input-row input::placeholder { color: #444; }
 
     .send-btn {
-      background: #1e3a5f;
-      color: #7aaee8;
-      border: none;
-      padding: 12px 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      min-height: 44px;
-      min-width: 64px;
-      transition: background .2s;
-    }
-    .send-btn:hover { background: #264d7a; }
-
-    @media (max-width: 380px) {
-      .role-header h1 { font-size: 22px; }
-      .role-card { padding: 18px 16px; }
-      .role-card h2 { font-size: 15px; }
+      background: #1e3a5f; color: #7aaee8;
+      border: none; padding: 12px 18px;
+      border-radius: 10px; cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      min-height: 44px; min-width: 64px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Background layers — controlled by JS -->
   <div id="bg-image"></div>
   <div id="bg-overlay"></div>
 
-  <!-- Screen 1: Role Selection -->
   <div class="screen active" id="screen-role">
     <div class="role-header">
       <h1>SafeSpace</h1>
@@ -288,7 +238,6 @@
     </div>
   </div>
 
-  <!-- Screen 2: Topic Selection -->
   <div class="screen" id="screen-topic">
     <div class="role-header">
       <h1>What's on your mind?</h1>
@@ -318,7 +267,6 @@
     </div>
   </div>
 
-  <!-- Screen 3: Waiting -->
   <div class="screen" id="screen-waiting">
     <div class="waiting-wrap">
       <div class="spinner"></div>
@@ -328,7 +276,6 @@
     </div>
   </div>
 
-  <!-- Screen 4: Chat -->
   <div class="screen" id="screen-chat">
     <div class="chat-header">
       <div class="chat-header-left">
@@ -346,6 +293,197 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/app.js"></script>
+  <script>
+    var socket = io();
+    var currentRoom = null;
+    var cooldown = false;
+    var typingTimer = null;
+
+    // Show background on load
+    document.getElementById('bg-image').classList.add('active');
+    document.getElementById('bg-overlay').classList.add('active');
+
+    // Role buttons
+    document.getElementById('btn-talker').addEventListener('click', function() {
+      showScreen('topic');
+    });
+
+    document.getElementById('btn-listener').addEventListener('click', function() {
+      if (cooldown) return;
+      socket.emit('join', { role: 'listener', topic: null });
+      showScreen('waiting');
+    });
+
+    // Topic cards
+    document.getElementById('topic-stress').addEventListener('click', function() {
+      joinAsTalker('Stress / Academics');
+    });
+    document.getElementById('topic-relations').addEventListener('click', function() {
+      joinAsTalker('Family & Relationships');
+    });
+    document.getElementById('topic-lonely').addEventListener('click', function() {
+      joinAsTalker('Loneliness');
+    });
+    document.getElementById('topic-vent').addEventListener('click', function() {
+      joinAsTalker('Just venting');
+    });
+
+    // Cancel and chat buttons
+    document.getElementById('btn-cancel').addEventListener('click', function() {
+      socket.emit('cancel');
+      showScreen('role');
+    });
+
+    document.getElementById('btn-end').addEventListener('click', function() {
+      endChat();
+    });
+
+    document.getElementById('btn-send').addEventListener('click', function() {
+      sendMessage();
+    });
+
+    document.getElementById('msgInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+        return;
+      }
+      document.getElementById('typing-indicator').style.display = 'block';
+      if (currentRoom) socket.emit('typing', currentRoom);
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(function() {
+        document.getElementById('typing-indicator').style.display = 'none';
+        if (currentRoom) socket.emit('stop_typing', currentRoom);
+      }, 1500);
+    });
+
+    // Functions
+    function joinAsTalker(topic) {
+      if (cooldown) return;
+      socket.emit('join', { role: 'talker', topic: topic });
+      showScreen('waiting');
+    }
+
+    function endChat() {
+      if (!currentRoom) return;
+      socket.emit('leave', currentRoom);
+      currentRoom = null;
+      clearChat();
+      startCooldown();
+      showScreen('role');
+    }
+
+    function clearChat() {
+      document.getElementById('messages').innerHTML = '';
+    }
+
+    function startCooldown() {
+      cooldown = true;
+      setTimeout(function() { cooldown = false; }, 3000);
+    }
+
+    function sendMessage() {
+      var input = document.getElementById('msgInput');
+      var text = input.value.trim();
+      if (!text || !currentRoom) return;
+      socket.emit('message', { room: currentRoom, text: text });
+      socket.emit('stop_typing', currentRoom);
+      clearTimeout(typingTimer);
+      document.getElementById('typing-indicator').style.display = 'none';
+      addMessage(text, 'me');
+      input.value = '';
+    }
+
+    function addMessage(text, sender) {
+      var div = document.createElement('div');
+      div.className = 'bubble ' +
+        (sender === 'me' ? 'bubble-me' : sender === 'them' ? 'bubble-them' : 'bubble-system');
+      div.innerText = text;
+      var box = document.getElementById('messages');
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(function(s) {
+        s.classList.remove('active');
+      });
+      document.getElementById('screen-' + name).classList.add('active');
+      if (name === 'role' || name === 'topic') {
+        document.getElementById('bg-image').classList.add('active');
+        document.getElementById('bg-overlay').classList.add('active');
+      } else {
+        document.getElementById('bg-image').classList.remove('active');
+        document.getElementById('bg-overlay').classList.remove('active');
+      }
+    }
+
+    // Socket events
+    socket.on('matched', function(data) {
+      currentRoom = data.room;
+      showScreen('chat');
+      if (data.topic) {
+        var banner = document.createElement('div');
+        banner.className = 'topic-banner';
+        banner.innerText = 'This person wants to talk about: ' + data.topic;
+        document.getElementById('messages').appendChild(banner);
+      }
+      addMessage('You are now connected. Say hello.', 'system');
+    });
+
+    socket.on('partner_left', function() {
+      addMessage('Your partner has disconnected.', 'system');
+      var btn = document.createElement('button');
+      btn.innerText = 'Find a new match';
+      btn.style.cssText = 'display:block;margin:12px auto;background:#1e3a5f;color:#7aaee8;border:none;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:13px;min-height:44px;';
+      btn.addEventListener('click', function() {
+        currentRoom = null;
+        clearChat();
+        var waitingTitle = document.querySelector('#screen-waiting h2');
+        var waitingSubtitle = document.querySelector('#screen-waiting p');
+        waitingTitle.innerText = 'Connecting...';
+        waitingTitle.style.fontWeight = 'bold';
+        waitingSubtitle.innerText = 'Please wait while we find someone new for you.';
+        showScreen('waiting');
+        setTimeout(function() {
+          socket.emit('join', { role: 'listener', topic: null });
+        }, 1000);
+      });
+      document.getElementById('messages').appendChild(btn);
+    });
+
+    socket.on('message', function(text) {
+      addMessage(text, 'them');
+    });
+
+    socket.on('typing', function() {
+      document.getElementById('typing-indicator').style.display = 'block';
+    });
+
+    socket.on('stop_typing', function() {
+      document.getElementById('typing-indicator').style.display = 'none';
+    });
+
+    socket.on('crisis_alert', function(helpline) {
+      var banner = document.createElement('div');
+      banner.className = 'crisis-banner';
+      banner.innerText = 'If you or someone needs help — ' + helpline;
+      document.getElementById('messages').appendChild(banner);
+    });
+
+    socket.on('error_msg', function(msg) {
+      var messages = document.getElementById('messages');
+      var bubbles = messages.querySelectorAll('.bubble-me');
+      if (bubbles.length > 0) {
+        var last = bubbles[bubbles.length - 1];
+        last.style.opacity = '0.4';
+        last.style.borderLeft = '3px solid #e05555';
+        var fail = document.createElement('span');
+        fail.innerText = ' ✕ not sent';
+        fail.style.cssText = 'font-size:11px;color:#e05555;margin-left:6px;';
+        last.appendChild(fail);
+      }
+    });
+  </script>
+
 </body>
 </html>

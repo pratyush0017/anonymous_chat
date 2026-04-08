@@ -3,7 +3,8 @@ let currentRoom = null;
 let cooldown = false;
 let typingTimer = null; // prevents instant rematch spam
 
-document.body.classList.add('on-role');
+document.getElementById('bg-image').classList.add('active');
+document.getElementById('bg-overlay').classList.add('active');
 
 // Role screen buttons
 document.getElementById('btn-talker').addEventListener('click', function() {
@@ -153,10 +154,14 @@ function showScreen(name) {
     s.classList.remove('active');
   });
   document.getElementById('screen-' + name).classList.add('active');
+
+  // Background only on role and topic screens
   if (name === 'role' || name === 'topic') {
-    document.body.classList.add('on-role');
+    document.getElementById('bg-image').classList.add('active');
+    document.getElementById('bg-overlay').classList.add('active');
   } else {
-    document.body.classList.remove('on-role');
+    document.getElementById('bg-image').classList.remove('active');
+    document.getElementById('bg-overlay').classList.remove('active');
   }
 }
 
