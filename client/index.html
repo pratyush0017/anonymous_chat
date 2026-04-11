@@ -23,11 +23,11 @@
       display: none;
       position: fixed;
       inset: 0;
-      background-image: url('https://imgs.search.brave.com/Jx8jBQ1itMsUdg8yKGM0lCofHfTc5k_8sjNk8kzyVk0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wNzQv/MTQ0Lzg0Mi9zbWFs/bC9lbmdhZ2luZy1j/b252ZXJzYXRpb24t/YW5pbWF0ZWQtY2hh/cmFjdGVycy12ZWN0/b3IuanBn');
       background-size: cover;
       background-position: center;
       z-index: 0;
     }
+    
     #bg-image.active { display: block; }
 
     #bg-overlay {
@@ -292,7 +292,7 @@
     </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+ <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     var socket = io();
     var currentRoom = null;
@@ -300,7 +300,9 @@
     var typingTimer = null;
 
     // Show background on load
-    document.getElementById('bg-image').classList.add('active');
+    var bgEl = document.getElementById('bg-image');
+    bgEl.style.backgroundImage = 'url("' + window.location.origin + '/bg.jpg")';
+    bgEl.classList.add('active');
     document.getElementById('bg-overlay').classList.add('active');
 
     // Role buttons
@@ -409,11 +411,15 @@
       });
       document.getElementById('screen-' + name).classList.add('active');
       if (name === 'role' || name === 'topic') {
-        document.getElementById('bg-image').classList.add('active');
-        document.getElementById('bg-overlay').classList.add('active');
+        var bgEl = document.getElementById('bg-image');
+      bgEl.style.backgroundImage = 'url("' + window.location.origin + '/bg.jpg")';
+      bgEl.classList.add('active');
+      document.getElementById('bg-overlay').classList.add('active');
       } else {
-        document.getElementById('bg-image').classList.remove('active');
-        document.getElementById('bg-overlay').classList.remove('active');
+       var bgEl = document.getElementById('bg-image');
+      bgEl.style.backgroundImage = 'url("' + window.location.origin + '/bg.jpg")';
+      bgEl.classList.add('active');
+      document.getElementById('bg-overlay').classList.add('active');
       }
     }
 
