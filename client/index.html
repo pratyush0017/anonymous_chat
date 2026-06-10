@@ -329,8 +329,10 @@
       log('btn-talker clicked');
       showScreen('topic');
     });
-    document.getElementById('btn-listener').addEventListener('click', function() {
+   document.getElementById('btn-listener').addEventListener('click', function() {
+      log('btn-listener clicked — cooldown:' + cooldown);
       if (cooldown) return;
+      log('emitting join as listener');
       socket.emit('join', { role: 'listener', topic: null });
       showScreen('waiting');
     });
@@ -378,8 +380,10 @@
     });
 
     // Functions
-    function joinAsTalker(topic) {
+   function joinAsTalker(topic) {
+      log('joinAsTalker called — cooldown:' + cooldown + ' topic:' + topic);
       if (cooldown) return;
+      log('emitting join as talker');
       socket.emit('join', { role: 'talker', topic: topic });
       showScreen('waiting');
     }
