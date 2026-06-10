@@ -296,8 +296,10 @@
 
 <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
   <script>
-   var socket = io();
-
+  var serverUrl = window.location.protocol + '//' + window.location.hostname + ':3000';
+var socket = io(serverUrl, {
+  transports: ['polling', 'websocket']
+});
     // Debug log — shows on screen so we can see errors on mobile
     var debugEl = document.createElement('div');
     debugEl.id = 'debug';
